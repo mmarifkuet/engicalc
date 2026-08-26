@@ -1,6 +1,7 @@
 import streamlit as st
 from calculations.mechanics import calculate_force, calculate_torque, calculate_power
 from calculations.fluid import calculate_flow_rate, calculate_reynolds_number
+from calculations.heat_transfer import calculate_conduction_heat_transfer, calculate_convection_heat_transfer
 
 st.set_page_config(
     page_title="EngiCalc",
@@ -101,6 +102,39 @@ elif category == "Fluid Mechanics":
                 st.warning("Flow Regime: **Transient**")
             else:
                 st.info("Flow Regime: **Turbulent**")
+
+elif category == "Heat Transfer":
+
+    st.header("Heat Transfer")
+
+    calculation = st.selectbox(
+        "Select calculation",
+        [
+            "Conduction",
+            "Convection"
+        ]
+    )
+
+    if calculation == "Conduction":
+        st.subheader("Conduction Heat Transfer Calculator (Fourier's Law)")
+        k = st.number_input("Thermal Conductivity (W/m·K)", min_value=0.0, value=45.0)
+        area = st.number_input("Surface Area (m²)", min_value=0.0, value=2.0)
+        temp_diff = st.number_input("Temperature Difference ΔT (K or °C)", min_value=0.0, value=50.0)
+        thickness = st.number_input("Wall Thickness (m)", min_value=0.001, value=0.05)
+
+        if st.button("Calculate Conduction Rate"):
+            q_cond = calculate_conduction_heat_transfer(k, area, temp_diff, thickness)
+            st.success(f"Heat Transfer Rate (Q) = {q_cond:.2f} W")
+
+    elif calculation == "Convection":
+        st.subheader("Convection Heat Transfer Calculator (Newton's Law)")
+        h = st.number_input("Heat Transfer Coefficient (W/m²·K)", min_value=0.0, value=25.0)
+        area = st.number_input("Surface Area (m²)", min_value=0.0, value=1.5)
+        temp_diff = st.number_input("Temperature Difference ΔT (K or °C)", min_value=0.0, value=30.0)
+
+        if st.button("Calculate Convection Rate"):
+            q_conv = calculate_convection_heat_transfer(h, area, temp_diff)
+            st.success(f"Heat Transfer Rate (Q) = {q_conv:.2f} W")
 
 else:
 
