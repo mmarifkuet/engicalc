@@ -1,4 +1,5 @@
 import streamlit as st
+from calculations.mechanics import calculate_force, calculate_torque, calculate_power
 
 st.set_page_config(
     page_title="EngiCalc",
@@ -52,7 +53,7 @@ if category == "Mechanics":
 
         if st.button("Calculate Force"):
 
-            force = mass * acceleration
+            force = calculate_force(mass, acceleration)
 
             st.success(
                 f"Force = {force:.2f} N"
@@ -76,7 +77,7 @@ if category == "Mechanics":
 
         if st.button("Calculate Torque"):
 
-            torque = force * radius
+            torque = calculate_torque(force, radius)
 
             st.success(
                 f"Torque = {torque:.2f} N·m"
@@ -100,7 +101,7 @@ if category == "Mechanics":
 
         if st.button("Calculate Power"):
 
-            power = torque * angular_velocity
+            power = calculate_power(torque, angular_velocity)
 
             st.success(
                 f"Power = {power:.2f} W"
