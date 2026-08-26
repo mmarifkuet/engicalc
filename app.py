@@ -1,5 +1,6 @@
 import streamlit as st
 from calculations.mechanics import calculate_force, calculate_torque, calculate_power
+from calculations.fluid import calculate_flow_rate, calculate_reynolds_number
 
 st.set_page_config(
     page_title="EngiCalc",
@@ -36,76 +37,70 @@ if category == "Mechanics":
     )
 
     if calculation == "Force":
-
         st.subheader("Force Calculator")
-
-        mass = st.number_input(
-            "Mass (kg)",
-            min_value=0.0,
-            value=10.0
-        )
-
-        acceleration = st.number_input(
-            "Acceleration (m/s²)",
-            min_value=0.0,
-            value=9.81
-        )
+        mass = st.number_input("Mass (kg)", min_value=0.0, value=10.0)
+        acceleration = st.number_input("Acceleration (m/s²)", min_value=0.0, value=9.81)
 
         if st.button("Calculate Force"):
-
             force = calculate_force(mass, acceleration)
-
-            st.success(
-                f"Force = {force:.2f} N"
-            )
+            st.success(f"Force = {force:.2f} N")
 
     elif calculation == "Torque":
-
         st.subheader("Torque Calculator")
-
-        force = st.number_input(
-            "Force (N)",
-            min_value=0.0,
-            value=100.0
-        )
-
-        radius = st.number_input(
-            "Radius (m)",
-            min_value=0.0,
-            value=0.5
-        )
+        force = st.number_input("Force (N)", min_value=0.0, value=100.0)
+        radius = st.number_input("Radius (m)", min_value=0.0, value=0.5)
 
         if st.button("Calculate Torque"):
-
             torque = calculate_torque(force, radius)
-
-            st.success(
-                f"Torque = {torque:.2f} N·m"
-            )
+            st.success(f"Torque = {torque:.2f} N·m")
 
     elif calculation == "Power":
-
         st.subheader("Power Calculator")
-
-        torque = st.number_input(
-            "Torque (N·m)",
-            min_value=0.0,
-            value=10.0
-        )
-
-        angular_velocity = st.number_input(
-            "Angular velocity (rad/s)",
-            min_value=0.0,
-            value=10.0
-        )
+        torque = st.number_input("Torque (N·m)", min_value=0.0, value=10.0)
+        angular_velocity = st.number_input("Angular velocity (rad/s)", min_value=0.0, value=10.0)
 
         if st.button("Calculate Power"):
-
             power = calculate_power(torque, angular_velocity)
+            st.success(f"Power = {power:.2f} W")
 
-            st.success(
-                f"Power = {power:.2f} W"
-            )
+elif category == "Fluid Mechanics":
+
+    st.header("Fluid Mechanics")
+
+    calculation = st.selectbox(
+        "Select calculation",
+        [
+            "Flow Rate",
+            "Reynolds Number"
+        ]
+    )
+
+    if calculation == "Flow Rate":
+        st.subheader("Volumetric Flow Rate Calculator")
+        velocity = st.number_input("Velocity (m/s)", min_value=0.0, value=2.0)
+        area = st.number_input("Cross-sectional Area (m²)", min_value=0.0, value=0.05)
+
+        if st.button("Calculate Flow Rate"):
+            flow_rate = calculate_flow_rate(velocity, area)
+            st.success(f"Flow Rate (Q) = {flow_rate:.4f} m³/s")
+
+    elif calculation == "Reynolds Number":
+        st.subheader("Reynolds Number Calculator")
+        density = st.number_input("Fluid Density (kg/m³)", min_value=0.0, value=1000.0)
+        velocity = st.number_input("Flow Velocity (m/s)", min_value=0.0, value=1.5)
+        diameter = st.number_input("Pipe Diameter (m)", min_value=0.0, value=0.1)
+        viscosity = st.number_input("Dynamic Viscosity (Pa·s)", min_value=0.00001, value=0.001, format="%.5f")
+
+        if st.button("Calculate Reynolds Number"):
+            reynolds = calculate_reynolds_number(density, velocity, diameter, viscosity)
+            st.success(f"Reynolds Number (Re) = {reynolds:.2f}")
+
+            if reynolds < 2300:
+                st.info("Flow Regime: **Laminar**")
+            elif reynolds <= 4000:
+                st.warning("Flow Regime: **Transient**")
+            else:
+                st.info("Flow Regime: **Turbulent**")
 
 else:
 
