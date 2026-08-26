@@ -1,4 +1,7 @@
 import streamlit as st
+import numpy as np
+import plotly.express as px
+
 from calculations.mechanics import calculate_force, calculate_torque, calculate_power
 from calculations.fluid import calculate_flow_rate, calculate_reynolds_number
 from calculations.heat_transfer import calculate_conduction_heat_transfer, calculate_convection_heat_transfer
@@ -104,6 +107,20 @@ elif category == "Fluid Mechanics":
             else:
                 st.info("Flow Regime: **Turbulent**")
 
+            # Plot Reynolds Number vs Velocity
+            v_range = np.linspace(0.1, 5.0, 50)
+            re_range = [(density * v * diameter) / viscosity for v in v_range]
+
+            fig = px.line(
+                x=v_range,
+                y=re_range,
+                labels={'x': 'Velocity (m/s)', 'y': 'Reynolds Number (Re)'},
+                title="Reynolds Number vs. Flow Velocity"
+            )
+            fig.add_hline(y=2300, line_dash="dash", line_color="green", annotation_text="Laminar Boundary (2300)")
+            fig.add_hline(y=4000, line_dash="dash", line_color="red", annotation_text="Turbulent Boundary (4000)")
+            st.plotly_chart(fig, use_container_width=True)
+
 elif category == "Heat Transfer":
 
     st.header("Heat Transfer")
@@ -126,6 +143,18 @@ elif category == "Heat Transfer":
         if st.button("Calculate Conduction Rate"):
             q_cond = calculate_conduction_heat_transfer(k, area, temp_diff, thickness)
             st.success(f"Heat Transfer Rate (Q) = {q_cond:.2f} W")
+
+            # Plot Heat Transfer vs Wall Thickness
+            t_range = np.linspace(0.005, 0.2, 50)
+            q_range = [calculate_conduction_heat_transfer(k, area, temp_diff, t) for t in t_range]
+
+            fig = px.line(
+                x=t_range,
+                y=q_range,
+                labels={'x': 'Wall Thickness (m)', 'y': 'Heat Transfer Rate Q (W)'},
+                title="Heat Transfer Rate vs. Wall Thickness"
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
     elif calculation == "Convection":
         st.subheader("Convection Heat Transfer Calculator (Newton's Law)")
@@ -159,6 +188,18 @@ elif category == "Thermodynamics":
         if st.button("Calculate Pressure"):
             p = calculate_ideal_gas_pressure(n, R, T, V)
             st.success(f"Pressure (P) = {p:.2f} Pa ({p/1000:.2f} kPa)")
+
+            # Plot P-V Isotherm Curve
+            v_range = np.linspace(0.005, 0.1, 50)
+            p_range = [calculate_ideal_gas_pressure(n, R, T, v_val) / 1000.0 for v_val in v_range]
+
+            fig = px.line(
+                x=v_range,
+                y=p_range,
+                labels={'x': 'Volume V (m³)', 'y': 'Pressure P (kPa)'},
+                title=f"Ideal Gas P-V Isotherm at T = {T} K"
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
     elif calculation == "Thermal Efficiency":
         st.subheader("Thermal Efficiency Calculator (η = W / Q_in)")
