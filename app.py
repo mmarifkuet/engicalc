@@ -2,6 +2,7 @@ import streamlit as st
 from calculations.mechanics import calculate_force, calculate_torque, calculate_power
 from calculations.fluid import calculate_flow_rate, calculate_reynolds_number
 from calculations.heat_transfer import calculate_conduction_heat_transfer, calculate_convection_heat_transfer
+from calculations.thermodynamics import calculate_ideal_gas_pressure, calculate_thermal_efficiency
 
 st.set_page_config(
     page_title="EngiCalc",
@@ -136,8 +137,34 @@ elif category == "Heat Transfer":
             q_conv = calculate_convection_heat_transfer(h, area, temp_diff)
             st.success(f"Heat Transfer Rate (Q) = {q_conv:.2f} W")
 
-else:
+elif category == "Thermodynamics":
 
-    st.info(
-        f"{category} calculations will be added soon."
+    st.header("Thermodynamics")
+
+    calculation = st.selectbox(
+        "Select calculation",
+        [
+            "Ideal Gas Law (Pressure)",
+            "Thermal Efficiency"
+        ]
     )
+
+    if calculation == "Ideal Gas Law (Pressure)":
+        st.subheader("Ideal Gas Law (P = nRT / V)")
+        n = st.number_input("Amount of Substance n (moles)", min_value=0.0, value=1.0)
+        R = st.number_input("Gas Constant R (J/mol·K)", min_value=0.0, value=8.314)
+        T = st.number_input("Absolute Temperature T (K)", min_value=0.0, value=298.15)
+        V = st.number_input("Volume V (m³)", min_value=0.001, value=0.024)
+
+        if st.button("Calculate Pressure"):
+            p = calculate_ideal_gas_pressure(n, R, T, V)
+            st.success(f"Pressure (P) = {p:.2f} Pa ({p/1000:.2f} kPa)")
+
+    elif calculation == "Thermal Efficiency":
+        st.subheader("Thermal Efficiency Calculator (η = W / Q_in)")
+        work = st.number_input("Work Output W (J or kJ)", min_value=0.0, value=500.0)
+        q_in = st.number_input("Heat Input Q_in (J or kJ)", min_value=0.0, value=1200.0)
+
+        if st.button("Calculate Efficiency"):
+            eta = calculate_thermal_efficiency(work, q_in)
+            st.success(f"Thermal Efficiency (η) = {eta:.2f}%")
